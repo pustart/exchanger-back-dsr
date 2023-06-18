@@ -1,6 +1,6 @@
-import { NestFactory } from '@nestjs/core';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { AppModule } from './app.module';
+import { NestFactory } from "@nestjs/core";
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import { AppModule } from "./app.module";
 
 async function bootstrap() {
   const PORT = process.env.PORT || 5000;
@@ -13,7 +13,7 @@ async function bootstrap() {
   });
 
   const config = new DocumentBuilder()
-    .setTitle("MoneyPie API")
+    .setTitle("Exchanger API")
     .setDescription("Exchanger app REST API documentation")
     .setVersion("0.1")
     .build();
