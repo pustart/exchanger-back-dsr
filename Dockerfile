@@ -1,5 +1,6 @@
 FROM node:18-alpine AS dist
 COPY package*.json ./
+COPY prisma ./prisma/
 
 RUN npm pkg delete scripts.prepare && npm install
 
@@ -24,6 +25,8 @@ COPY --from=dist dist /usr/src/app/dist
 COPY --from=node_modules node_modules /usr/src/app/node_modules
 
 COPY . /usr/src/app
+
+RUN npx prisma generate
 
 EXPOSE $PORT
 
