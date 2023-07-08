@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "src/database/prisma.service";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
@@ -30,14 +30,53 @@ export class UsersService {
     });
   }
 
-  findAll() {
-    return this.prisma.user.findMany();
+  async findAll() {
+    const users = await this.prisma.user.findMany({
+      include: {
+        things: true,
+      },
+    });
+
+    const usersWithCount = users.map((user) => {
+      const thingsCount = user.things.length;
+      return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        birthday: user.birthday,
+        photo: user.photo,
+        role: user.role,
+        thingsCount,
+      };
+    });
+
+    return usersWithCount;
   }
 
-  findOne(id: string) {
-    return this.prisma.user.findUnique({
+  async findOne(id: string) {
+    const user = await this.prisma.user.findUnique({
       where: { id },
+      include: {
+        things: true,
+      },
     });
+
+    if (!user) {
+      throw new NotFoundException(FIND_USER_ERROR);
+    }
+
+    const thingsCount = user.things.length;
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      birthday: user.birthday,
+      photo: user.photo,
+      role: user.role,
+      thingsCount,
+    };
   }
 
   update(id: string, updateUserDto: UpdateUserDto) {
