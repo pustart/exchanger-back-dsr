@@ -16,6 +16,7 @@ async function bootstrap() {
     .setTitle("Exchanger API")
     .setDescription("Exchanger app REST API documentation")
     .setVersion("0.1")
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

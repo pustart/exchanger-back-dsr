@@ -16,7 +16,7 @@ model User {
   password String   @unique
   email    String   @unique
   phone    String   @unique
-  birthday DateTime
+  birthday DateTime @db.Date
   photo    String?
   role     Role     @default(USER)
   things   Thing[]
@@ -34,7 +34,7 @@ model Thing {
   name        String
   description String
   address     String
-  photo       String
+  photo       String?
 
   author           User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId         String
