@@ -23,7 +23,7 @@ export class CategoriesService {
     return this.prisma.category.update({
       where: { id: categoryId },
 
-      data: UpdateCategoryDto,
+      data: updateCategoryDto,
     });
   }
 
