@@ -11,6 +11,7 @@ import {
   FIND_USER_ERROR,
   HASH_ERROR,
 } from "./users.constants";
+import { Role } from "@prisma/client";
 
 @Injectable()
 export class UsersService {
@@ -18,7 +19,6 @@ export class UsersService {
 
   create(createUserDto: CreateUserDto) {
     const { birthday } = createUserDto;
-    console.log(birthday);
     const [year, month, day] = birthday.split("-").map(Number);
     const date = new Date(year, month - 1, day);
 
@@ -32,6 +32,11 @@ export class UsersService {
 
   async findAll() {
     const users = await this.prisma.user.findMany({
+      where: {
+        NOT: {
+          role: Role.ADMIN,
+        },
+      },
       include: {
         things: true,
       },
