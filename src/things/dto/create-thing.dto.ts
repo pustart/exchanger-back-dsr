@@ -9,7 +9,7 @@ export class CreateThingDto {
 
   @ApiProperty()
   @IsString()
-  description?: string;
+  description: string;
 
   @ApiProperty()
   @IsNotEmpty()

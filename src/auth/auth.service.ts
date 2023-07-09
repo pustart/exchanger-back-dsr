@@ -23,7 +23,6 @@ export class AuthService {
       email: user.email,
       name: user.name,
     });
-    console.log(token);
 
     return {
       ...user,
