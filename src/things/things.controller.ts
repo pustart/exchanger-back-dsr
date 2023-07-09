@@ -17,16 +17,22 @@ export class ThingsController {
     return this.thingsService.create(createThingDto);
   }
 
-  @Get()
+  @Get("/all/:id")
   @UseGuards(JwtAuthGuard)
-  findAll() {
-    return this.thingsService.findAll();
+  findAll(@Param("id") id: string) {
+    return this.thingsService.findAll(id);
   }
 
   @Get(":id")
   @UseGuards(JwtAuthGuard)
   findOne(@Param("id") id: string) {
     return this.thingsService.findOne(id);
+  }
+
+  @Get("/findUserThings/:id")
+  @UseGuards(JwtAuthGuard)
+  findUserThings(@Param("id") id: string) {
+    return this.thingsService.findUserThings(id);
   }
 
   @Patch(":id")

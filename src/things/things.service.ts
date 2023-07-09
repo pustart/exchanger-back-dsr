@@ -11,12 +11,77 @@ export class ThingsService {
     return this.prisma.thing.create({ data: createThingDto });
   }
 
-  findAll() {
-    return this.prisma.thing.findMany();
+  findAll(userId: string) {
+    return this.prisma.thing
+      .findMany({
+        where: {
+          NOT: {
+            authorId: userId,
+          },
+        },
+        include: {
+          category: true,
+          exchangeCategory: true,
+          author: true,
+        },
+      })
+      .then((things) => {
+        return things.map((thing) => ({
+          ...thing,
+          author: thing.author.name,
+          phone: thing.author.phone,
+          category: thing.category.name,
+          exchangeCategory: thing.exchangeCategory.name,
+        }));
+      });
   }
 
   findOne(id: string) {
-    return this.prisma.thing.findUnique({ where: { id } });
+    return this.prisma.thing
+      .findUnique({
+        where: {
+          id,
+        },
+        include: {
+          category: true,
+          exchangeCategory: true,
+          author: true,
+        },
+      })
+      .then((thing) => {
+        if (!thing) return null;
+
+        return {
+          ...thing,
+          author: thing.author.name,
+          phone: thing.author.phone,
+          category: thing.category.name,
+          exchangeCategory: thing.exchangeCategory.name,
+        };
+      });
+  }
+
+  findUserThings(userId: string) {
+    return this.prisma.thing
+      .findMany({
+        where: {
+          authorId: userId,
+        },
+        include: {
+          category: true,
+          exchangeCategory: true,
+          author: true,
+        },
+      })
+      .then((things) => {
+        return things.map((thing) => ({
+          ...thing,
+          author: thing.author.name,
+          phone: thing.author.phone,
+          category: thing.category.name,
+          exchangeCategory: thing.exchangeCategory.name,
+        }));
+      });
   }
 
   update(id: string, updateThingDto: UpdateThingDto) {
