@@ -77,7 +77,11 @@ export class UsersController {
     @Body() updateUserDto: UpdateUserDto,
   ) {
     const photoUrl = photo ? `/${photo.filename}` : null;
-    updateUserDto.photo = photoUrl;
+    if (!photoUrl) {
+      updateUserDto.photo = updateUserDto.photoUrl === "null" ? null : updateUserDto.photoUrl;
+    } else {
+      updateUserDto.photo = photoUrl;
+    }
     return this.usersService.update(id, updateUserDto);
   }
 

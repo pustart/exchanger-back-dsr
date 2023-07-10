@@ -36,6 +36,62 @@ export class ThingsService {
       });
   }
 
+  async findExchangeable(userId: string) {
+    const userCategories = await this.prisma.thing.findMany({
+      where: {
+        authorId: userId,
+      },
+      distinct: ["categoryId"],
+      select: {
+        categoryId: true,
+      },
+    });
+
+    const userCategoriesToExchange = await this.prisma.thing.findMany({
+      where: {
+        authorId: userId,
+      },
+      distinct: ["exchangeCategoryId"],
+      select: {
+        exchangeCategoryId: true,
+      },
+    });
+
+    const categoryIds = userCategories.map((category) => category.categoryId);
+    const exchangeCategoryIds = userCategoriesToExchange.map(
+      (category) => category.exchangeCategoryId,
+    );
+
+    const things = await this.prisma.thing.findMany({
+      where: {
+        exchangeCategoryId: {
+          in: categoryIds,
+        },
+        categoryId: {
+          in: exchangeCategoryIds,
+        },
+        NOT: {
+          authorId: userId,
+        },
+      },
+      include: {
+        category: true,
+        exchangeCategory: true,
+        author: true,
+      },
+    });
+
+    const transformedThings = things.map((thing) => ({
+      ...thing,
+      author: thing.author.name,
+      phone: thing.author.phone,
+      category: thing.category.name,
+      exchangeCategory: thing.exchangeCategory.name,
+    }));
+
+    return transformedThings;
+  }
+
   findOne(id: string) {
     return this.prisma.thing
       .findUnique({
@@ -85,14 +141,31 @@ export class ThingsService {
   }
 
   update(id: string, updateThingDto: UpdateThingDto) {
+    const data = {
+      name: updateThingDto.name,
+      description: updateThingDto.description,
+      authorId: updateThingDto.authorId,
+      categoryId: updateThingDto.categoryId,
+      exchangeCategoryId: updateThingDto.exchangeCategoryId,
+      photo: updateThingDto.photo,
+    };
     return this.prisma.thing.update({
       where: { id },
 
-      data: updateThingDto,
+      data,
     });
   }
 
   remove(id: string) {
     return this.prisma.thing.delete({ where: { id } });
+  }
+
+  async exchange(thingId1: string, thingId2: string) {
+    const deleteThing1 = this.prisma.thing.delete({ where: { id: thingId1 } });
+    const deleteThing2 = this.prisma.thing.delete({ where: { id: thingId2 } });
+
+    await Promise.all([deleteThing1, deleteThing2]);
+
+    return true;
   }
 }

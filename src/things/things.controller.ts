@@ -51,6 +51,12 @@ export class ThingsController {
     return this.thingsService.findAll(id);
   }
 
+  @Get("/exchangeable/:id")
+  @UseGuards(JwtAuthGuard)
+  findExchangeable(@Param("id") id: string) {
+    return this.thingsService.findExchangeable(id);
+  }
+
   @Get(":id")
   @UseGuards(JwtAuthGuard)
   findOne(@Param("id") id: string) {
@@ -83,7 +89,11 @@ export class ThingsController {
     @Body() updateThingDto: UpdateThingDto,
   ) {
     const photoUrl = photo ? `/${photo.filename}` : null;
-    updateThingDto.photo = photoUrl;
+    if (!photoUrl) {
+      updateThingDto.photo = updateThingDto.photoUrl === "null" ? null : updateThingDto.photoUrl;
+    } else {
+      updateThingDto.photo = photoUrl;
+    }
     return this.thingsService.update(id, updateThingDto);
   }
 
@@ -91,5 +101,11 @@ export class ThingsController {
   @UseGuards(JwtAuthGuard)
   remove(@Param("id") id: string) {
     return this.thingsService.remove(id);
+  }
+
+  @Delete("/exchange/:thingId1/:thingId2")
+  @UseGuards(JwtAuthGuard)
+  exchange(@Param("thingId1") thingId1: string, @Param("thingId2") thingId2: string) {
+    return this.thingsService.exchange(thingId1, thingId2);
   }
 }
