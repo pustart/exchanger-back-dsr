@@ -16,6 +16,7 @@ export class CreateThingDto {
   @IsString()
   address: string;
 
+  @ApiProperty({ required: false })
   @ApiProperty()
   @IsString()
   photo?: string;

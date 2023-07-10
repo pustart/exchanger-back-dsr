@@ -1,9 +1,23 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  UseInterceptors,
+  UploadedFile,
+} from "@nestjs/common";
 import { ThingsService } from "./things.service";
 import { CreateThingDto } from "./dto/create-thing.dto";
 import { UpdateThingDto } from "./dto/update-thing.dto";
-import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "src/auth/guards/jwt.guard";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { diskStorage } from "multer";
+import { v4 as uuidv4 } from "uuid";
 
 @ApiTags("Things")
 @Controller("things")
@@ -13,7 +27,21 @@ export class ThingsController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  create(@Body() createThingDto: CreateThingDto) {
+  @UseInterceptors(
+    FileInterceptor("photo", {
+      storage: diskStorage({
+        destination: "./public",
+        filename: (req, file, cb) => {
+          const filename = uuidv4();
+          const extension = file.originalname.split(".").pop();
+          cb(null, `${filename}.${extension}`);
+        },
+      }),
+    }),
+  )
+  async create(@UploadedFile() photo: Express.Multer.File, @Body() createThingDto: CreateThingDto) {
+    const photoUrl = photo ? `/${photo.filename}` : null;
+    createThingDto.photo = photoUrl;
     return this.thingsService.create(createThingDto);
   }
 
@@ -37,7 +65,25 @@ export class ThingsController {
 
   @Patch(":id")
   @UseGuards(JwtAuthGuard)
-  update(@Param("id") id: string, @Body() updateThingDto: UpdateThingDto) {
+  @UseInterceptors(
+    FileInterceptor("photo", {
+      storage: diskStorage({
+        destination: "./public",
+        filename: (req, file, cb) => {
+          const filename = uuidv4();
+          const extension = file.originalname.split(".").pop();
+          cb(null, `${filename}.${extension}`);
+        },
+      }),
+    }),
+  )
+  update(
+    @UploadedFile() photo: Express.Multer.File,
+    @Param("id") id: string,
+    @Body() updateThingDto: UpdateThingDto,
+  ) {
+    const photoUrl = photo ? `/${photo.filename}` : null;
+    updateThingDto.photo = photoUrl;
     return this.thingsService.update(id, updateThingDto);
   }
 
